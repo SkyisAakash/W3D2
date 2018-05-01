@@ -172,5 +172,31 @@ class Reply
 
 end
 
+class Question_follows
+attr_accessor :id, :usr_id, :ques_id
+
+  def initialize(options)
+    @id = options['id']
+    @usr_id = options['usr_id']
+    @ques_id = options['ques_id']
+  end
+
+  def self.followers_for_question_id(question_id)
+    followers = QuestionsDatabase.instance.execute(<<-SQL, question_id)
+    SELECT
+    fname, lname
+    FROM
+    question_follows
+    JOIN
+    users
+    ON
+    question_follows.usr_id = users.id
+    WHERE
+    question_follows.ques_id = ?
+    SQL
+    followers.map {|follower| Users.find_by_name(follower[0],follower[1])}
+  end
+end
+
 # a = Questions.new({'id'=>'4','title'=>'new question','body'=>'its a bad question','associated_author'=>'1'})
 # b = Reply.new({'id'=>'5','sub_ques_id'=>'2','author_of_reply_id'=>'1','body'=>'this is annoying'})
