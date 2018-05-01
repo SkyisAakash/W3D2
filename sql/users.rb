@@ -31,7 +31,8 @@ class Questions
       WHERE
       id = ?
     SQL
-    return nil unless id.is_a?(Integer)
+
+    return nil if questions.empty?
     Questions.new(questions.first)
   end
 
@@ -44,6 +45,7 @@ class Questions
       WHERE
       associated_author = ?
     SQL
+    return nil if query.empty?
     Questions.new(query.first)
   end
 end
@@ -67,8 +69,35 @@ class Users
         WHERE
         id = ?
       SQL
-      return nil unless id.is_a?(Integer)
+      return nil if users.empty?
       Users.new(users.first)
+    end
+
+end
+
+class Reply
+
+    attr_accessor :id, :fname, :lname
+
+    def initialize(options)
+      @id = options['id']
+      @sub_ques_id = options['sub_ques_id']
+      @parent_reply_id = options['parent_reply_id']
+      @author_of_reply_id = options['author_of_reply_id']
+      @body = options['body']
+    end
+
+    def self.find_by_user_id(userid)
+      users = QuestionsDatabase.instance.execute(<<-SQL, userid)
+        SELECT
+        *
+        FROM
+        replies
+        WHERE
+        author_of_reply_id = ?
+      SQL
+      return nil if users.empty?
+      users.map {|user| Reply.new(user)}
     end
 
 end
