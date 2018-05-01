@@ -100,4 +100,19 @@ class Reply
       users.map {|user| Reply.new(user)}
     end
 
+    def self.find_by_question_id(question_id)
+      question = QuestionsDatabase.instance.execute(<<-SQL, question_id)
+      SELECT
+      *
+      FROM
+      replies
+      WHERE
+      sub_ques_id = ?
+
+      SQL
+
+      return nil if question.empty?
+      question.map {|question| Reply.new(question)}
+    end
+
 end
