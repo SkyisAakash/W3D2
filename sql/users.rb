@@ -35,6 +35,17 @@ class Questions
     Questions.new(questions.first)
   end
 
+  def self.find_by_author_id(authorid)
+    query = QuestionsDatabase.instance.execute(<<-SQL, authorid)
+      SELECT
+      *
+      FROM
+      questions
+      WHERE
+      associated_author = ?
+    SQL
+    Questions.new(query.first)
+  end
 end
 
 class Users
