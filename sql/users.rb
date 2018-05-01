@@ -48,6 +48,14 @@ class Questions
     return nil if query.empty?
     Questions.new(query.first)
   end
+
+  def author
+    Users.find_by_id(@associated_author)
+  end
+
+
+
+
 end
 
 class Users
@@ -71,6 +79,27 @@ class Users
       SQL
       return nil if users.empty?
       Users.new(users.first)
+    end
+
+    def self.find_by_name(fname, lname)
+      users = QuestionsDatabase.instance.execute(<<-SQL, fname, lname)
+        SELECT
+        *
+        FROM
+        users
+        WHERE
+        fname = ? AND lname = ?
+      SQL
+      return nil if users.empty?
+      Users.new(users.first)
+    end
+
+    def authored_questions
+      Question.find_by_author_id(self.id)
+    end
+
+    def authored_replies
+      Reply.find_by_user_id(self.id)
     end
 
 end
@@ -114,5 +143,18 @@ class Reply
       return nil if question.empty?
       question.map {|question| Reply.new(question)}
     end
+
+    def author
+      Users.find_by_id(@author_of_reply_id)
+    end
+
+    def question
+      Question.find_by_id(@sub_ques_id)
+    end
+
+    def parent_reply
+      Reply.find_by_user_id(@parent_reply_id)
+    end
+
 
 end
