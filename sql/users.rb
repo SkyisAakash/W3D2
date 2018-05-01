@@ -1,7 +1,7 @@
 require 'sqlite3'
 require 'singleton'
 
-class QuestionsDatabase << SQLite3::Database
+class QuestionsDatabase < SQLite3::Database
   include Singleton
 
   def initialize
@@ -12,6 +12,8 @@ class QuestionsDatabase << SQLite3::Database
 end
 
 class Questions
+
+  attr_accessor :id, :title, :body, :associated_author
 
   def initialize(options)
     @id = options['id']
@@ -32,5 +34,30 @@ class Questions
     return nil unless id.is_a?(Integer)
     Questions.new(questions.first)
   end
+
+end
+
+class Users
+
+    attr_accessor :id, :fname, :lname
+
+    def initialize(options)
+      @id = options['id']
+      @firstname = options['fname']
+      @lastname = options['lname']
+    end
+
+    def self.find_by_id(id)
+      users = QuestionsDatabase.instance.execute(<<-SQL, id)
+        SELECT
+        *
+        FROM
+        users
+        WHERE
+        id = ?
+      SQL
+      return nil unless id.is_a?(Integer)
+      Users.new(users.first)
+    end
 
 end
