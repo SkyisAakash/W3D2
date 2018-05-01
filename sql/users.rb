@@ -149,12 +149,28 @@ class Reply
     end
 
     def question
-      Question.find_by_id(@sub_ques_id)
+      Questions.find_by_id(@sub_ques_id)
     end
 
     def parent_reply
       Reply.find_by_user_id(@parent_reply_id)
     end
 
+    def child_replies
+      replies = QuestionsDatabase.instance.execute(<<-SQL)
+      SELECT
+      *
+      FROM
+      replies
+      WHERE
+      parent_reply_id = @id
+      SQL
+
+      return nil if replies.empty?
+      replies.map {|reply| Reply.new(reply)}
+    end
 
 end
+
+# a = Questions.new({'id'=>'4','title'=>'new question','body'=>'its a bad question','associated_author'=>'1'})
+# b = Reply.new({'id'=>'5','sub_ques_id'=>'2','author_of_reply_id'=>'1','body'=>'this is annoying'})
