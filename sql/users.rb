@@ -58,7 +58,6 @@ class Questions
   end
 
 
-
 end
 
 class Users
@@ -221,6 +220,23 @@ attr_accessor :id, :usr_id, :ques_id
       question_follows.usr_id = ?
       SQL
       questions.map {|question| Questions.find_by_id(question['ques_id'])}
+    end
+
+    def self.most_followed_questions(n)
+      questions = QuestionsDatabase.instance.execute(<<-SQL)
+          SELECT
+          ques_id, COUNT(*) AS followers
+          FROM
+          question_follows
+          GROUP BY
+          ques_id
+          ORDER BY
+           followers DESC
+          LIMIT
+          n
+          SQL
+          questions.map {|question| Questions.find_by_id(question['ques_id'])}
+
     end
 
 end
