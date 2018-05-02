@@ -53,6 +53,9 @@ class Questions
     Users.find_by_id(@associated_author)
   end
 
+  def followers
+    Question_follows.followers_for_question_id(@id)
+  end
 
 
 
@@ -101,6 +104,12 @@ class Users
     def authored_replies
       Reply.find_by_user_id(self.id)
     end
+
+    def followed_questions
+      Question_follows.followed_questions_for_user_id(self.id)
+    end
+
+
 
 end
 
@@ -196,6 +205,24 @@ attr_accessor :id, :usr_id, :ques_id
     SQL
     followers.map {|follower| Users.find_by_name(follower[0],follower[1])}
   end
+
+
+    def self.followed_questions_for_user_id(user_id)
+      questions = QuestionsDatabase.instance.execute(<<-SQL, user_id)
+      SELECT
+      ques_id
+      FROM
+      question_follows
+      JOIN
+      questions
+      ON
+      question_follows.ques_id = questions.id
+      WHERE
+      question_follows.usr_id = ?
+      SQL
+      questions.map {|question| Questions.find_by_id(question['ques_id'])}
+    end
+
 end
 
 # a = Questions.new({'id'=>'4','title'=>'new question','body'=>'its a bad question','associated_author'=>'1'})
